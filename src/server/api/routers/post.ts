@@ -3,8 +3,8 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { posts } from "@/server/db/schema";
 
-export const postRouter = createTRPCRouter({
-  hell: publicProcedure
+export const postsRouter = createTRPCRouter({
+  hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
       return {
@@ -23,8 +23,8 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  hello: publicProcedure.query(({ ctx }) => {
-    return ctx.db.query.posts.findFirst({
+  getAll: publicProcedure.query(({ ctx }) => {
+    return ctx.db.query.posts.findMany({
       orderBy: (posts, { desc }) => [desc(posts.createdAt)],
     });
   }),

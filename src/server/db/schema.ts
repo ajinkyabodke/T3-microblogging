@@ -4,6 +4,7 @@
 import { sql } from "drizzle-orm";
 import {
   index,
+  pgTable,
   pgTableCreator,
   serial,
   timestamp,
@@ -16,19 +17,19 @@ import {
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `learning-t3_${name}`);
 
-export const posts = createTable(
+export const posts = pgTable(
   "post",
   {
     id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
+    authorId: varchar("authorId", { length: 255 }),
+    content: varchar("content", { length: 256 }),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt"),
   },
   (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  })
+    authorIdIndex: index("authorId_idx").on(example.authorId),
+  }),
 );

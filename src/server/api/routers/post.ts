@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { posts } from "@/server/db/schema";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
@@ -23,20 +27,21 @@ export const postsRouter = createTRPCRouter({
       };
     }),
 
-  create: publicProcedure
-    .input(z.object({ content: z.string().min(1) }))
+  create: privateProcedure
+    .input(z.object({ content: z.string().emoji().min(1).max(250) }))
     .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      await ctx.db.insert(posts).values({
+      const authorId = ctx.userId;
+      const post = await ctx.db.insert(posts).values({
+        authorId,
         content: input.content,
       });
+      return post;
     }),
 
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.query.posts.findMany({
       limit: 100,
+      orderBy: (posts, { desc }) => [desc(posts.createdAt)],
     });
 
     const users = (

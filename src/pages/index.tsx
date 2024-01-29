@@ -8,7 +8,8 @@ import dayjs from "dayjs";
 
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
-import { LoadingPage, LoadingSpinner } from "@/components/loading";
+import { LoadingPage } from "@/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
@@ -19,6 +20,18 @@ const inter = Inter({
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+
+  const [input, setInput] = useState("");
+
+  const ctx = api.useUtils();
+
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+  });
+
   if (!user) return null;
 
   return (
@@ -33,7 +46,11 @@ const CreatePostWizard = () => {
       <input
         placeholder="Vent out our feelings..."
         className="grow bg-transparent outline-none"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
   );
 };

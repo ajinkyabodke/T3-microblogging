@@ -128,8 +128,31 @@ export const postsRouter = createTRPCRouter({
       limit: 100,
       orderBy: (posts, { desc }) => [desc(posts.createdAt)],
     });
-    return addUserDataToPosts(posts);
 
+    const users = (
+      await clerkClient.users.getUserList({
+        userId: posts.map((post) => post.authorId).filter(Boolean) as string[],
+        limit: 100,
+      })
+    ).map(userFilterForClient);
+
+    return posts.map((post) => {
+      const author = users.find((user) => user.id === post.authorId);
+
+      if (!author) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Author for post not found",
+        });
+      }
+      return {
+        post,
+        author: {
+          ...author,
+          username: author.username,
+        },
+      };
+    });
     // return ctx.db.query.posts.findMany({
     //   orderBy: (posts, { desc }) => [desc(posts.createdAt)],
     // });

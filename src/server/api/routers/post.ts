@@ -7,19 +7,13 @@ import {
 } from "@/server/api/trpc";
 import { posts } from "@/server/db/schema";
 import { clerkClient } from "@clerk/nextjs";
-import { User } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 
-const userFilterForClient = (user: User) => {
-  return {
-    id: user.id,
-    username: `${user.firstName.toLowerCase()}${user.lastName?.toLowerCase()}`,
-    imageUrl: user.imageUrl,
-  };
-};
+
 
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
+import { userFilterForClient } from "@/server/helpers/filterUserForClient";
 
 // Create a new ratelimiter, that allows 3 requests per 1 minute
 const ratelimit = new Ratelimit({
@@ -76,7 +70,6 @@ export const postsRouter = createTRPCRouter({
       })
     ).map(userFilterForClient);
 
-    console.log(users);
     return posts.map((post) => {
       const author = users.find((user) => user.id === post.authorId);
 

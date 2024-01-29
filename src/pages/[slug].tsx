@@ -9,7 +9,7 @@ import Head from "next/head";
 import Image from "next/image";
 
 const ProfileFeed = (props: { userId: string }) => {
-  const { data, isLoading } = api.posts.getAll.useQuery({
+  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
     userId: props.userId,
   });
 
@@ -53,6 +53,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
           data.username ?? data.externalUsername ?? "unknown"
         }`}</div>
         <div className="w-full border-b border-slate-400" />
+        <ProfileFeed userId={data.id} />
       </PageLayout>
     </>
   );

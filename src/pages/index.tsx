@@ -50,7 +50,7 @@ const CreatePostWizard = () => {
         height={56}
       />
       <input
-        placeholder="Type some emojis..."
+        placeholder="What's happening?"
         className="grow bg-transparent outline-none"
         value={input}
         onChange={(e) => setInput(e.target.value)}
